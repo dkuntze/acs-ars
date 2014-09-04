@@ -3,11 +3,11 @@
 <properties>
 <comment>FileVault Package Properties</comment>
 <entry key="buildCount">1</entry>
-<entry key="version">0.0.1-SNAPSHOT</entry>
+<entry key="version">1.0</entry>
 <entry key="dependencies" />
 <entry key="packageFormatVersion">2</entry>
-<entry key="description">ACS AEM DnB Project Content Package</entry>
-<entry key="group">acs-dnb</entry>
-<entry key="name">acs-aem-dnb</entry>
-<entry key="path">/etc/packages/acs-dnb/acs-aem-dnb-0.0.1-SNAPSHOT.zip</entry>
+<entry key="description">ACS AEM ars Project Content Package</entry>
+<entry key="group">acs-dkuntze</entry>
+<entry key="name">acs-aem-ars</entry>
+<entry key="path">/etc/packages/acs-dkuntze/acs-aem-ars-1.0.zip</entry>
 </properties>

@@ -1,4 +1,4 @@
-package com.adobe.acs.dnb;
+package com.adobe.acs.ars;
 
 import com.day.cq.analytics.sitecatalyst.SitecatalystException;
 import com.day.cq.analytics.sitecatalyst.SitecatalystHttpClient;
@@ -140,7 +140,7 @@ public class AnalyticsReportScheduler implements Runnable {
                     createReportNode( siteCatReport );
 
                 } else {
-                    log.info( "Report wasn't returned by analytics within configured time frame.");
+                    log.info("Report wasn't returned by analytics within configured time frame.");
                 }
             }
 

@@ -6,8 +6,8 @@
     <!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
     <!-- ====================================================================== -->
     <parent>
-        <groupId>com.adobe.acs.dnb</groupId>
-        <artifactId>acs-aem-dnb</artifactId>
+        <groupId>com.adobe.acs.dkuntze</groupId>
+        <artifactId>acs-aem-ars</artifactId>
         <version>1.0</version>
     </parent>
 
@@ -15,9 +15,9 @@
     <!-- P R O J E C T D E S C R I P T I O N -->
     <!-- ====================================================================== -->
 
-    <artifactId>acs-aem-dnb-bundle</artifactId>
+    <artifactId>acs-aem-ars-bundle</artifactId>
     <packaging>bundle</packaging>
-    <name>ACS AEM DnB Project Bundle</name>
+    <name>ACS AEM ars Project Bundle</name>
 
     <dependencies>
         <dependency>
@@ -157,7 +157,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>com.adobe.acs.dnb.acs-aem-dnb</Bundle-SymbolicName>
+                        <Bundle-SymbolicName>com.adobe.acs.ars.acs-aem-ars</Bundle-SymbolicName>
                     </instructions>
                 </configuration>
             </plugin>
@@ -165,7 +165,7 @@
                 <groupId>org.apache.sling</groupId>
                 <artifactId>maven-sling-plugin</artifactId>
                 <configuration>
-                    <slingUrl>http://${crx.host}:${crx.port}/apps/acs-dnb/install</slingUrl>
+                    <slingUrl>http://${crx.host}:${crx.port}/apps/acs-ars/install</slingUrl>
                     <usePut>true</usePut>
                 </configuration>
             </plugin>

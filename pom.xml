@@ -6,13 +6,13 @@
     <!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
     <!-- ====================================================================== -->
 
-    <groupId>com.adobe.acs.dnb</groupId>
-    <artifactId>acs-aem-dnb</artifactId>
+    <groupId>com.adobe.acs.dkuntze</groupId>
+    <artifactId>acs-aem-ars</artifactId>
     <version>1.0</version>
     <packaging>pom</packaging>
 
-    <name>ACS AEM DnB Project - Reactor Project</name>
-    <description>Maven Multimodule project for ACS AEM DnB Project.</description>
+    <name>ACS AEM ars Project - Reactor Project</name>
+    <description>Maven Multimodule project for ACS AEM ars Project.</description>
 
     <prerequisites>
         <maven>3.0.2</maven>

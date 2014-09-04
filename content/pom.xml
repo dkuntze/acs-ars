@@ -6,8 +6,8 @@
     <!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
     <!-- ====================================================================== -->
     <parent>
-        <groupId>com.adobe.acs.dnb</groupId>
-        <artifactId>acs-aem-dnb</artifactId>
+        <groupId>com.adobe.acs.dkuntze</groupId>
+        <artifactId>acs-aem-ars</artifactId>
         <version>1.0</version>
     </parent>
 
@@ -15,14 +15,14 @@
     <!-- P R O J E C T D E S C R I P T I O N -->
     <!-- ====================================================================== -->
 
-    <artifactId>acs-aem-dnb-content</artifactId>
+    <artifactId>acs-aem-ars-content</artifactId>
     <packaging>content-package</packaging>
-    <name>ACS AEM DnB Project Content Package</name>
+    <name>ACS AEM ars Project Content Package</name>
 
     <dependencies>
         <dependency>
-            <groupId>com.adobe.acs.dnb</groupId>
-            <artifactId>acs-aem-dnb-bundle</artifactId>
+            <groupId>com.adobe.acs.dkuntze</groupId>
+            <artifactId>acs-aem-ars-bundle</artifactId>
             <version>${version}</version>
         </dependency>
         <dependency>
@@ -150,13 +150,13 @@
                 <artifactId>content-package-maven-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
-                    <group>acs-dnb</group>
+                    <group>acs-ars</group>
                     <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
                     <embeddeds>
                         <embedded>
-                            <groupId>com.adobe.acs.dnb</groupId>
-                            <artifactId>acs-aem-dnb-bundle</artifactId>
-                            <target>/apps/acs-dnb/install</target>
+                            <groupId>com.adobe.acs.dkuntze</groupId>
+                            <artifactId>acs-aem-ars-bundle</artifactId>
+                            <target>/apps/acs-ars/install</target>
                         </embedded>
                     </embeddeds>
 

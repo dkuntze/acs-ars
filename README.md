@@ -1,4 +1,4 @@
-ACS AEM DnB Project
+ACS AEM ARS Project - Analytics Report Scheduler
 ========
 
 This a content package project generated using the AEM Multimodule Lazybones template.
