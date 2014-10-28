@@ -83,7 +83,7 @@ public class AnalyticsReportScheduler implements Runnable {
 
     private Session adminSession = null;
 
-    private Date now = new Date();
+
     SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
 
     Calendar myCal = Calendar.getInstance();
@@ -101,7 +101,8 @@ public class AnalyticsReportScheduler implements Runnable {
 
     private void requestReport(){
 
-        myCal.add(Calendar.DATE, -numberOfDays);
+        //put this here to get a fresh 'now' each execution
+        Date now = new Date();
 
         try{
             String filterCriteria = "";
@@ -242,9 +243,6 @@ public class AnalyticsReportScheduler implements Runnable {
     protected void activate(final Map<String, Object> config) {
         configure(config);
         log.debug("activated");
-        //log.debug(sdf.format(now));
-
-        //log.debug(sdf.format(myCal.getTime()));
     }
 
     private void configure(final Map<String, Object> config) {
@@ -262,6 +260,8 @@ public class AnalyticsReportScheduler implements Runnable {
         log.debug("configure: reportNode='{}'", this.reportNode);
         log.debug("configure: propName='{}'", this.propName);
         log.debug("configure: propValues='{}'", StringUtils.join(this.propValues,", "));
+
+        myCal.add(Calendar.DATE, -numberOfDays);
     }
 
 
