@@ -4,9 +4,11 @@ import com.day.cq.analytics.sitecatalyst.SitecatalystException;
 import com.day.cq.analytics.sitecatalyst.SitecatalystHttpClient;
 import com.day.cq.wcm.webservicesupport.Configuration;
 import com.day.cq.wcm.webservicesupport.ConfigurationManager;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.jackrabbit.commons.JcrUtils;
+import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -18,6 +20,7 @@ import javax.jcr.*;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
@@ -63,6 +66,14 @@ public class AnalyticsReportScheduler implements Runnable {
     public static final String REPORT_NODE = "ars.reportnode";
     private String reportNode;
 
+    @Property(label = "Property or Evar", description = "The property or evar name to filter on. Leaving blank disables the filter.")
+    public static final String PROPERTY_NAME = "ars.propname";
+    private String propName;
+
+    @Property(label = "Property/Evar Values", description = "The property/evar values to filter on", unbounded = PropertyUnbounded.ARRAY)
+    public static final String PROPERTY_VALUES = "ars.propvalues";
+    private String[] propValues;
+
 
     @Property(label = "Number of days", description = "The number of days to report on.",intValue = 5)
     public static final String NUMBER_OF_DAYS = "ars.noOfDays";
@@ -93,6 +104,12 @@ public class AnalyticsReportScheduler implements Runnable {
         myCal.add(Calendar.DATE, -numberOfDays);
 
         try{
+            String filterCriteria = "";
+
+            if (propName != null) {
+                JSONArray selectedArray = new JSONArray(Arrays.asList(this.propValues));
+                filterCriteria = "{\"id\":\"" + this.propName + "\", \"selected\":" + selectedArray.toString() + "}\n\"";
+            }
 
             String reportPayload = "{\n" +
                     "                \"reportDescription\":{\n" +
@@ -100,7 +117,8 @@ public class AnalyticsReportScheduler implements Runnable {
                     "                        \"dateFrom\":\"" + sdf.format(myCal.getTime()) + "\",\n" +
                     "                        \"dateTo\":\"" + sdf.format(now) + "\",\n" +
                     "                        \"metrics\":[{\"id\":\"pageViews\"},{\"id\":\"reloads\"},{\"id\":\"entries\"},{\"id\":\"exits\"},{\"id\":\"averageTimeSpentOnPage\"}],\n" +
-                    "                \"elements\":[{\"id\":\"page\", \"top\":\"" + numResults + "\"}]\n" +
+                    "                \"elements\":[" + filterCriteria +
+                    "                       {\"id\":\"page\", \"top\":\"" + numResults + "\"}]\n" +
                     "            }\n" +
                     "            }";
 
@@ -182,8 +200,8 @@ public class AnalyticsReportScheduler implements Runnable {
     boolean isReportReady( String reportId, Configuration configuration ) throws SitecatalystException, JSONException {
         boolean isReady = false;
 
-        String reportStatusPaylod = "{\"reportID\" : \"" + reportId + "\"}";
-        String reportStatus = httpClient.execute( "Report.GetStatus", reportStatusPaylod, configuration );
+        String reportStatusPayload = "{\"reportID\" : \"" + reportId + "\"}";
+        String reportStatus = httpClient.execute( "Report.GetStatus", reportStatusPayload, configuration );
         log.debug( reportStatus );
 
         JSONObject reportStatusJson = new JSONObject( reportStatus );
@@ -235,11 +253,15 @@ public class AnalyticsReportScheduler implements Runnable {
         this.analyticsNode = PropertiesUtil.toString(config.get(ANALYTICS_NODE), null);
         this.reportNode = PropertiesUtil.toString(config.get(REPORT_NODE), "analytics-report-" + myCal.getTime().getTime());
         this.numberOfDays = PropertiesUtil.toInteger(config.get(NUMBER_OF_DAYS), 5);
+        this.propName = PropertiesUtil.toString(config.get(PROPERTY_NAME), null);
+        this.propValues = PropertiesUtil.toStringArray(config.get(PROPERTY_VALUES), null);
         log.debug("configure: reportSuiteId='{}'", this.reportSuiteId);
         log.debug("configure: numResults='{}'", this.numResults);
         log.debug("configure: analyticsNode='{}'", this.analyticsNode);
         log.debug("configure: numberOfDays='{}'", this.numberOfDays);
         log.debug("configure: reportNode='{}'", this.reportNode);
+        log.debug("configure: propName='{}'", this.propName);
+        log.debug("configure: propValues='{}'", StringUtils.join(this.propValues,", "));
     }
 
 
