@@ -107,9 +107,9 @@ public class AnalyticsReportScheduler implements Runnable {
         try{
             String filterCriteria = "";
 
-            if (propName != null) {
+            if (propName != null && !propName.equals("") && propValues != null) {
                 JSONArray selectedArray = new JSONArray(Arrays.asList(this.propValues));
-                filterCriteria = "{\"id\":\"" + this.propName + "\", \"selected\":" + selectedArray.toString() + "}\n\"";
+                filterCriteria = "{\"id\":\"" + this.propName + "\", \"selected\":" + selectedArray.toString() + "},\n";
             }
 
             String reportPayload = "{\n" +
@@ -136,6 +136,8 @@ public class AnalyticsReportScheduler implements Runnable {
                 */
 
                 JSONObject reportRequestJson = new JSONObject( reportRequest );
+
+
                 String reportId = reportRequestJson.getString("reportID");
                 log.debug( reportRequest );
 
