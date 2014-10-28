@@ -25,6 +25,8 @@ import java.util.Map;
 @org.apache.felix.scr.annotations.Component(
         metatype = true,
         immediate = false,
+        configurationFactory = true,
+        policy = ConfigurationPolicy.REQUIRE,
         label="ACS Analytics Report Fetcher",
         description="Fetches a configured analytics report via configuration"
 )
@@ -57,6 +59,11 @@ public class AnalyticsReportScheduler implements Runnable {
     public static final String ANALYTICS_NODE = "ars.analyticsnode";
     private String analyticsNode;
 
+    @Property(label = "Report Name", description = "The name of the report node to be saved in the repository")
+    public static final String REPORT_NODE = "ars.reportnode";
+    private String reportNode;
+
+
     @Property(label = "Number of days", description = "The number of days to report on.",intValue = 5)
     public static final String NUMBER_OF_DAYS = "ars.noOfDays";
     private int numberOfDays = 5;
@@ -72,7 +79,7 @@ public class AnalyticsReportScheduler implements Runnable {
 
     public void run() {
 
-        log.info( "Analytics Report Scheduler firing." );
+        log.info( "Analytics Report Scheduler firing for "+ reportNode );
         requestReport();
 
     }
@@ -90,7 +97,7 @@ public class AnalyticsReportScheduler implements Runnable {
             String reportPayload = "{\n" +
                     "                \"reportDescription\":{\n" +
                     "                \"reportSuiteID\":\"" + reportSuiteId + "\",\n" +
-                    "                        \"dateFrom\":\"2014-08-25\",\n" +
+                    "                        \"dateFrom\":\"" + sdf.format(myCal.getTime()) + "\",\n" +
                     "                        \"dateTo\":\"" + sdf.format(now) + "\",\n" +
                     "                        \"metrics\":[{\"id\":\"pageViews\"},{\"id\":\"reloads\"},{\"id\":\"entries\"},{\"id\":\"exits\"},{\"id\":\"averageTimeSpentOnPage\"}],\n" +
                     "                \"elements\":[{\"id\":\"page\", \"top\":\"" + numResults + "\"}]\n" +
@@ -205,7 +212,7 @@ public class AnalyticsReportScheduler implements Runnable {
 
         Node reportNode = JcrUtils.getOrAddNode( varNode, "acs-analytics", "sling:Folder" ); //create /var/feeds node if it doesnt exist already
 
-        Node reportFile = JcrUtils.getOrAddNode( reportNode, "analytics-report.json" , "nt:file" );
+        Node reportFile = JcrUtils.getOrAddNode( reportNode, this.reportNode + ".json" , "nt:file" );
         Node jcrContentNode = JcrUtils.getOrAddNode( reportFile, "jcr:content", "nt:resource" );
         jcrContentNode.setProperty( "jcr:mimeType", "application/json" );
         jcrContentNode.setProperty( "jcr:data", contentValue );
@@ -217,20 +224,22 @@ public class AnalyticsReportScheduler implements Runnable {
     protected void activate(final Map<String, Object> config) {
         configure(config);
         log.debug("activated");
-        log.debug(sdf.format(now));
+        //log.debug(sdf.format(now));
 
-        log.debug(sdf.format(myCal.getTime()));
+        //log.debug(sdf.format(myCal.getTime()));
     }
 
     private void configure(final Map<String, Object> config) {
         this.reportSuiteId = PropertiesUtil.toString(config.get(REPORT_SUITE_ID), null);
         this.numResults = PropertiesUtil.toString(config.get(NUM_RESULTS), null);
         this.analyticsNode = PropertiesUtil.toString(config.get(ANALYTICS_NODE), null);
+        this.reportNode = PropertiesUtil.toString(config.get(REPORT_NODE), "analytics-report-" + myCal.getTime().getTime());
         this.numberOfDays = PropertiesUtil.toInteger(config.get(NUMBER_OF_DAYS), 5);
         log.debug("configure: reportSuiteId='{}'", this.reportSuiteId);
         log.debug("configure: numResults='{}'", this.numResults);
         log.debug("configure: analyticsNode='{}'", this.analyticsNode);
         log.debug("configure: numberOfDays='{}'", this.numberOfDays);
+        log.debug("configure: reportNode='{}'", this.reportNode);
     }
 
 
