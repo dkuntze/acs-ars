@@ -7,19 +7,21 @@ a report with Adobe Analytics (SiteCatalyst) and retrieves and saves it as a jso
 this can only run a 'top' pages report query.
 
 AEM Versions Tested:
+
 5.6.1
 
 This bundle requires a configuration to be active. Without an OSGi configuration it will not run.
 
 Configuration Options:
-Frequency - the number of seconds between execution
-Report Suite - the report suite to use to retrieve the report data
-Number of Results - the number of results to return
-Analytics Node Name - the name of the cloud service node that contains represents the credentials for your analytics in AEM/CQ
-Report Name - the name of the node to save the results as. (saves under /var/acs-analytics)
-Property or Evar - the prop name or evar name to filter the results as. If blank, this disables filtering
-Property/Evar values - multi-field list of values of the property listed above
-Number of Days - the number of days into the past to report on. Start date is 'now' and end date is now minus number of days
+
+- Frequency - the number of seconds between execution
+- Report Suite - the report suite to use to retrieve the report data
+- Number of Results - the number of results to return
+- Analytics Node Name - the name of the cloud service node that contains represents the credentials for your analytics in AEM/CQ
+- Report Name - the name of the node to save the results as. (saves under /var/acs-analytics)
+- Property or Evar - the prop name or evar name to filter the results as. If blank, this disables filtering
+- Property/Evar values - multi-field list of values of the property listed above
+- Number of Days - the number of days into the past to report on. Start date is 'now' and end date is now minus number of days
 
 Building
 --------

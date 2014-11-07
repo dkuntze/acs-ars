@@ -74,10 +74,19 @@ public class AnalyticsReportScheduler implements Runnable {
     public static final String PROPERTY_VALUES = "ars.propvalues";
     private String[] propValues;
 
+    @Property(label = "Path Filter", description = "Filter the results based on path using ^ (start) $ (end) and * (wildcard)", unbounded = PropertyUnbounded.ARRAY)
+    public static final String FILTER_VALUES = "ars.filtervalues";
+    private String[] filterValues;
+
 
     @Property(label = "Number of days", description = "The number of days to report on.",intValue = 5)
     public static final String NUMBER_OF_DAYS = "ars.noOfDays";
     private int numberOfDays = 5;
+
+    private static int REPORT_READY = 1;
+    private static int REPORT_NOT_READY = 0;
+    private static int REPORT_FAILED = 2;
+
 
     Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
@@ -112,6 +121,18 @@ public class AnalyticsReportScheduler implements Runnable {
                 filterCriteria = "{\"id\":\"" + this.propName + "\", \"selected\":" + selectedArray.toString() + "},\n";
             }
 
+            /**
+             * this section handles the path filtering. We're using the keywords as our attribute since this appears to work.
+             * TODO: research the reportDesciptionSearch section as it seems to map to the advanced filter better.
+             */
+            String reportDescriptionSearch = "";
+            //reportDescriptionSearch = ",\"search\":{ \"type\": \"and\", \"keywords\": [ \"*\" ], \"searches\": [ \"^http\" ]}";
+            if (filterValues != null || filterValues.length > 0) {
+                JSONArray filterArray = new JSONArray(Arrays.asList(this.filterValues));
+                reportDescriptionSearch = ",\"search\":{ \"type\": \"or\", \"keywords\": " +  filterArray.toString() + "}";
+            }
+
+
             String reportPayload = "{\n" +
                     "                \"reportDescription\":{\n" +
                     "                \"reportSuiteID\":\"" + reportSuiteId + "\",\n" +
@@ -119,9 +140,11 @@ public class AnalyticsReportScheduler implements Runnable {
                     "                        \"dateTo\":\"" + sdf.format(now) + "\",\n" +
                     "                        \"metrics\":[{\"id\":\"pageViews\"},{\"id\":\"reloads\"},{\"id\":\"entries\"},{\"id\":\"exits\"},{\"id\":\"averageTimeSpentOnPage\"}],\n" +
                     "                \"elements\":[" + filterCriteria +
-                    "                       {\"id\":\"page\", \"top\":\"" + numResults + "\"}]\n" +
+                    "                       {\"id\":\"page\", \"top\":\"" + numResults + "\"" + reportDescriptionSearch + "}]\n" +
                     "            }\n" +
                     "            }";
+
+            log.debug(reportPayload);
 
             adminSession = repository.loginAdministrative( null );
 
@@ -145,7 +168,7 @@ public class AnalyticsReportScheduler implements Runnable {
                     After getting the report id, get the report status
                 */
 
-                boolean isReportReady = false;
+                int isReportReady;
                 int i = 0;
 
                 // 5 second delay and five tries before failing. You may have to tweak this for longer running reports
@@ -154,19 +177,20 @@ public class AnalyticsReportScheduler implements Runnable {
                     i++;
                     log.debug( "isReportReady {}, i {}", isReportReady, i );
                     Thread.sleep( 5000 ); //Wait before calling again.
-                } while ( !isReportReady && i <= 5 );
+                } while ( isReportReady != REPORT_READY && isReportReady != REPORT_FAILED && i <= 5 );
 
-                if( isReportReady ){
+                if( isReportReady == REPORT_READY ) {
 
                     /*
                        If report is ready, get the report and create a node under /var to save the report
                     */
 
                     String getReportPayload = "{\"reportID\" : \"" + reportId + "\"}";
-                    String siteCatReport = httpClient.execute( "Report.GetReport", getReportPayload, siteCatConfig );
-                    log.debug( siteCatReport );
-                    createReportNode( siteCatReport );
+                    String siteCatReport = httpClient.execute("Report.GetReport", getReportPayload, siteCatConfig);
+                    log.debug(siteCatReport);
 
+                } else if(isReportReady == REPORT_FAILED) {
+                    log.info("Report failed with an error.");
                 } else {
                     log.info("Report wasn't returned by analytics within configured time frame.");
                 }
@@ -200,8 +224,9 @@ public class AnalyticsReportScheduler implements Runnable {
      * @throws JSONException
      */
 
-    boolean isReportReady( String reportId, Configuration configuration ) throws SitecatalystException, JSONException {
-        boolean isReady = false;
+    int isReportReady( String reportId, Configuration configuration ) throws SitecatalystException, JSONException {
+
+        int isReady = REPORT_NOT_READY;
 
         String reportStatusPayload = "{\"reportID\" : \"" + reportId + "\"}";
         String reportStatus = httpClient.execute( "Report.GetStatus", reportStatusPayload, configuration );
@@ -210,7 +235,9 @@ public class AnalyticsReportScheduler implements Runnable {
         JSONObject reportStatusJson = new JSONObject( reportStatus );
         String status = reportStatusJson.getString( "status" );
         if( status.equalsIgnoreCase( "done" ) ){
-            isReady = true;
+            isReady = REPORT_READY;
+        } else if(status.equalsIgnoreCase( "failed" )) {
+            isReady = REPORT_FAILED;
         }
 
         return isReady;
@@ -255,6 +282,7 @@ public class AnalyticsReportScheduler implements Runnable {
         this.numberOfDays = PropertiesUtil.toInteger(config.get(NUMBER_OF_DAYS), 5);
         this.propName = PropertiesUtil.toString(config.get(PROPERTY_NAME), null);
         this.propValues = PropertiesUtil.toStringArray(config.get(PROPERTY_VALUES), null);
+        this.filterValues = PropertiesUtil.toStringArray(config.get(FILTER_VALUES), null);
         log.debug("configure: reportSuiteId='{}'", this.reportSuiteId);
         log.debug("configure: numResults='{}'", this.numResults);
         log.debug("configure: analyticsNode='{}'", this.analyticsNode);
@@ -262,6 +290,7 @@ public class AnalyticsReportScheduler implements Runnable {
         log.debug("configure: reportNode='{}'", this.reportNode);
         log.debug("configure: propName='{}'", this.propName);
         log.debug("configure: propValues='{}'", StringUtils.join(this.propValues,", "));
+        log.debug("configure: filterValues='{}'", StringUtils.join(this.filterValues,", "));
 
         myCal.add(Calendar.DATE, -numberOfDays);
     }
