@@ -22,6 +22,7 @@ Configuration Options:
 - Property or Evar - the prop name or evar name to filter the results as. If blank, this disables filtering
 - Property/Evar values - multi-field list of values of the property listed above
 - Number of Days - the number of days into the past to report on. Start date is 'now' and end date is now minus number of days
+- Path Filter - Allows you to do filtering based on path. ^ start $ end and * wildcard expressions are supported. This maps to the keyword attribute
 
 Building
 --------
